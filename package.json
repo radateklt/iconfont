@@ -1,0 +1,37 @@
+{
+  "name": "@radatek/iconfont",
+  "version": "0.1.0",
+  "description": "Iconfont vite/tailwind plugins for: Material-Symbols, Fontawesome, Lucide",
+  "author": "Radatek, Darius Kisonas",
+  "license": "ISC",
+  "keywords": [
+    "tailwindcss-plugin",
+    "vite-plugin",
+    "icons",
+    "material-icons",
+    "material-symbols",
+    "fontawesome",
+    "lucide"
+  ],
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js"
+    },
+    "./tailwind": {
+      "types": "./tailwind.d.ts",
+      "import": "./tailwind.js"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/radateklt/iconfont.git"
+  },
+  "dependencies": {
+    "@pixi/svg2ttf": "^6.1.0",
+    "fontkit": "^2.0.4",
+    "wawoff2": "^2.0.1"
+  }
+}
