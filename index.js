@@ -9,6 +9,46 @@ import crypto from 'crypto'
 const defaultUserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36'
 const emptyFont = 'data:font/woff2;base64,d09GMgABAAAAAALoAA0AAAAABmQAAAKRAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP0ZGVE0cGh4GYACCQggCYAkgCxYIBBcOBAQgBYR9B4M9G70I6wY2ZjbO7S8K6mqaat9NDALxw9uP77u973tL6pIsm7ZpG5S6IGvKEmAtE6N0KCWpC1WjT/UFrv9/fL9/v9/f79/v9/f79/v9/f79/n8A/0H/r/+p/3807P8fF3Mv+pP+pD9mGv2WfWkY6A6/Tf6vA8T/I3F0I8X69U6mN9U9vQ4QeL6vI98f+Y5P677mO3vVn706f9H/K9/u9X0LwP9P9C9C4j+P6T6F+f/59/8D/M8EAA=='
 
+const defaultCss = {
+  base: {
+    '@font-face': {
+      'font-family': '"iconfont"',
+      'font-style': 'normal',
+      'font-weight': '400',
+      'src': `url(iconfont.woff2) format("woff2")`,
+    }
+  },
+  components: {
+    '.icon': {
+      'font-family': '"iconfont"',
+      'font-weight': 'normal',
+      'font-style': 'normal',
+      'max-width': '2em',
+      'width': '1.25em',
+      'text-align': 'center',
+      'overflow': 'hidden',
+      'letter-spacing': 'normal',
+      'text-transform': 'none',
+      'display': 'inline-block',
+      'white-space': 'nowrap',
+      'word-wrap': 'normal',
+      'direction': 'ltr',
+      'line-height': '1',
+      'font-feature-settings': '"liga"',
+      'vertical-align': 'middle',
+      'font-display': 'block',
+      'font-size': '1.25em'
+    },
+    '.icon::before': {
+      'content': 'var(--icon-content)',
+      'vertical-align': 'middle'
+    },
+    '.icon.filled': {
+      'font-variation-settings': '"FILL" 1'
+    }
+  }
+}
+
 class SVGGlyph {
   constructor(name, code, ligature, width, svg) {
     this.name = name
@@ -160,43 +200,9 @@ export class IconFont {
   async generateCSS(glyphs) {
     const css = []
     const add = s => css.push(s)
-    add(`@font-face {
-  font-family: "iconfont";
-  font-style: normal;
-  font-weight: 400;
-  src: url(iconfont.woff2) format("woff2");
-}`)
-    add(`.icon {
-  font-family: "iconfont";
-  font-weight: normal;
-  font-style: normal;
-  max-width: 2em;
-  width: 1.25em;
-  text-align: center;
-  overflow: hidden;
-  letter-spacing: normal;
-  text-transform: none;
-  display: inline-block;
-  white-space: nowrap;
-  word-wrap: normal;
-  direction: ltr;
-  line-height: 1;
-  font-feature-settings: "liga";
-  vertical-align: middle;
-  font-display: block;
-}
-.icon.filled {
-  font-variation-settings: 'FILL' 1;
-}
-.icon {
-  font-size: 1.25em;
-  vertical-align: middle;
-}
-.icon::before {
-  content: var(--icon-content);
-  vertical-align: middle;
-}`)
-
+    const addObj = o => Object.entries(o).forEach(([k, v]) => add(`${k} {${Object.entries(v).map(([k2, v2]) => `  ${k2}: ${v2}`).join(';\n')};\n}`))
+    addObj(defaultCss.base)
+    addObj(defaultCss.components)
     if (typeof glyphs === 'string')
       glyphs = glyphs.split(',')
     if (!glyphs)
@@ -554,54 +560,15 @@ export const tailwindPlugin = pluginWithOptions((options) => {
 
   return {
     handler: ({ addBase, addComponents, matchUtilities, theme }) => {
-      addBase({
-        '@font-face': {
-          'font-family': '"iconfont"',
-          'font-style': 'normal',
-          'font-weight': '400',
-          'src': `url(iconfont.woff2) format("woff2")`,
-        },
-      })
-      addComponents({
-        '.icon': {
-          'font-family': '"iconfont"',
-          'font-weight': 'normal',
-          'font-style': 'normal',
-          'max-width': '2em',
-          'width': '1.25em',
-          'text-align': 'center',
-          'overflow': 'hidden',
-          'letter-spacing': 'normal',
-          'text-transform': 'none',
-          'display': 'inline-block',
-          'white-space': 'nowrap',
-          'word-wrap': 'normal',
-          'direction': 'ltr',
-          'line-height': '1',
-          'font-feature-settings': '"liga"',
-          'vertical-align': 'middle',
-          'font-display': 'block',
-          'font-size': '1.25em',
-          '&::before': {
-            'content': 'var(--icon-content)',
-            'vertical-align': 'middle',
-          },
-        },
-        '.icon.filled': {
-          'font-variation-settings': '"FILL" 1',
-        },
-      })
-
+      addBase(defaultCss.base)
+      addComponents(defaultCss.components)
       matchUtilities(
         {
-          'icon': (value) => ({
-            '--icon-content': `"${value}"`,
-          }),
+          'icon': (value) => ({'--icon-content': `"${value}"`}),
         },
         {
           values: theme('icon'),
-        }
-      )
+        })
     },
     config: {
       theme: {

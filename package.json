@@ -1,6 +1,6 @@
 {
   "name": "@radatek/iconfont",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Iconfont vite/tailwind plugins for: Material-Symbols, Fontawesome, Lucide",
   "author": "Radatek, Darius Kisonas",
   "license": "ISC",
