@@ -5,6 +5,8 @@ import svg2ttf from '@pixi/svg2ttf'
 import wawoff2 from 'wawoff2'
 import path from 'path'
 import crypto from 'crypto'
+import { fileURLToPath } from 'url'
+import { existsSync } from 'fs'
 
 const defaultUserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36'
 const emptyFont = 'data:font/woff2;base64,d09GMgABAAAAAALoAA0AAAAABmQAAAKRAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP0ZGVE0cGh4GYACCQggCYAkgCxYIBBcOBAQgBYR9B4M9G70I6wY2ZjbO7S8K6mqaat9NDALxw9uP77u973tL6pIsm7ZpG5S6IGvKEmAtE6N0KCWpC1WjT/UFrv9/fL9/v9/f79/v9/f79/v9/f79/n8A/0H/r/+p/3807P8fF3Mv+pP+pD9mGv2WfWkY6A6/Tf6vA8T/I3F0I8X69U6mN9U9vQ4QeL6vI98f+Y5P677mO3vVn706f9H/K9/u9X0LwP9P9C9C4j+P6T6F+f/59/8D/M8EAA=='
@@ -83,6 +85,16 @@ class SVGGlyph {
   }
 }
 
+function getProjectRoot() {
+  let curr = path.dirname(fileURLToPath(import.meta.url))
+  while (curr !== path.parse(curr).root) {
+    if (existsSync(path.join(curr, 'package.json')) && !curr.includes('node_modules'))
+      return curr
+    curr = path.dirname(curr)
+  }
+  return process.cwd()
+}
+
 export class IconFont {
   constructor(iconsType, cacheDir) {
     switch (iconsType) {
@@ -110,7 +122,7 @@ export class IconFont {
         this.iconsType = 'custom'
         this.fontUrl = iconsType
     }
-    this.cacheDir = cacheDir || path.join(process.cwd(), 'node_modules', '.cache', 'iconfont')
+    this.cacheDir = cacheDir || path.join(getProjectRoot(), 'node_modules', '.cache', 'iconfont')
     this.fontPath = ''
 
     this.id = 'iconfont'
@@ -390,7 +402,7 @@ export class IconFont {
     // special case for material design icons
     if (glyphs && this.fontUrl.startsWith('https://fonts.googleapis.com')) {
       const headers = { 'User-Agent': defaultUserAgent }
-      const url = this.fontUrl + '&icon_names=' + glyphs.join(',')
+      const url = this.fontUrl + '&icon_names=' + glyphs.sort().join(',')
       const hash = crypto.createHash('sha256').update(url).digest('hex')
       const cachePath = path.join(this.cacheDir, `${this.iconsType}-${hash}.woff2`)
       if (await fs.stat(cachePath).catch(() => {}))
